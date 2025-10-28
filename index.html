@@ -13,11 +13,12 @@
         --btn-border: rgba(0,0,0,.1);
         --btn-shadow: 0 8px 24px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
         --radius: 14px;
+        --ok: #22c55e;
+        --bar-bg: rgba(255,255,255,.6);
       }
 
       * { box-sizing: border-box; }
       html, body { height: 100%; margin: 0; }
-
       body {
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
         color: var(--text);
@@ -27,17 +28,7 @@
         min-height: 100vh;
       }
 
-      main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        text-align: center;
-        width: 100%;
-        max-width: 960px;
-        padding: 20px;
-      }
-
+      main { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; width: 100%; max-width: 960px; padding: 20px; }
       h1 { margin: 0; font-size: clamp(26px, 5vw, 44px); line-height: 1.15; }
       p.subtitle { margin: 0; font-size: 14px; color: rgba(11, 18, 32, 0.7); }
 
@@ -45,18 +36,35 @@
       .btn {
         appearance: none; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--btn-text);
         font-weight: 600; font-size: 16px; padding: 14px 0; border-radius: var(--radius); box-shadow: var(--btn-shadow);
-        cursor: pointer; text-decoration: none; width: 200px; text-align: center; transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+        cursor: pointer; text-decoration: none; width: 200px; text-align: center; transition: transform .08s ease, box-shadow .2s ease;
       }
       .btn:hover { transform: translateY(-1px); }
       .btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+      .hidden { display: none !important; }
 
-      .hidden { display: none; }
+      /* === Input bars screen === */
+      #barsScreen { width: 100%; max-width: 760px; display: grid; gap: 18px; margin-top: 20px; }
+      .bar {
+        background: var(--bar-bg);
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 999px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--btn-shadow);
+      }
+      .bar::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 0%;
+        height: 100%;
+        background: var(--ok);
+        transition: width 0.4s ease;
+      }
+      .bar.filled::after { width: 100%; }
 
-      .question-title { font-size: clamp(28px, 4vw, 36px); font-weight: 700; margin-top: 16px; }
-      .sub-explain { font-size: clamp(14px, 2vw, 16px); color: rgba(11, 18, 32, 0.8); margin-top: 6px; }
-      #result, #colorResult, #actResult, #personalityResult { font-size: 22px; font-weight: 600; margin-top: 8px; }
-
-      /* Build stage: layered composition */
+      /* === Build stage === */
       #buildPage h2 { margin: 6px 0 16px; }
       .stage {
         position: relative;
@@ -70,7 +78,6 @@
         box-shadow: var(--btn-shadow);
       }
       .stage img { position: absolute; image-rendering: auto; max-width: none; max-height: none; }
-
       .bgImg { inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
       .bodyImg { width: 60%; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1; object-fit: contain; }
       .accImg { width: 28%; left: 4%; bottom: 6%; z-index: 2; object-fit: contain; }
@@ -82,51 +89,24 @@
         object-fit: contain;
       }
 
-      /* Center GIF overlay inside the stage */
       #gifContainer {
-        position: absolute;
-        inset: 0;
-        display: none; /* shown after build */
-        z-index: 5; /* above character layers */
-        pointer-events: none; /* let clicks pass through */
-        opacity: 1;
-        transition: opacity 400ms ease;
+        position: absolute; inset: 0; display: none; z-index: 5; pointer-events: none;
+        opacity: 1; transition: opacity 400ms ease;
       }
       #gifContainer.hide { opacity: 0; }
       .center-gif {
         position: absolute;
-        /* 세로를 stage 높이에 맞춤 */
         top: 0; bottom: 0; left: 50%;
         transform: translateX(-50%);
-        height: 100%;      /* ✅ 배경(stage) 세로높이와 동일 */
-        width: auto;       /* 가로는 비율 유지 */
-        max-height: none;  /* 제한 제거 */
-        object-fit: contain;
-      }
-      .gif-note {
-        position: absolute; inset: 0; display: grid; place-items: center;
-        font-size: 14px; color: rgba(0,0,0,.7);
+        height: 100%; width: auto; max-height: none; object-fit: contain;
       }
 
       .nameRow { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 6px; flex-wrap: wrap; }
       .nameRow input[type="text"] {
-        width: min(360px, 80vw);
-        padding: 10px 12px;
-        border: 1px solid var(--btn-border);
-        border-radius: 10px;
-        font-size: 16px;
-        box-shadow: var(--btn-shadow);
+        width: min(360px, 80vw); padding: 10px 12px; border: 1px solid var(--btn-border);
+        border-radius: 10px; font-size: 16px; box-shadow: var(--btn-shadow);
       }
-      .nameRow button {
-        padding: 12px 16px;
-        border-radius: 10px;
-        border: 1px solid var(--btn-border);
-        background: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: var(--btn-shadow);
-      }
-      .nameRow button:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+      .nameRow .btn { width: auto; padding: 12px 16px; }
     </style>
   </head>
   <body>
@@ -136,142 +116,135 @@
         <p class="subtitle">☠️A totally unexpected identity!☠️</p>
         <div class="actions">
           <button class="btn" id="goBtn">GO</button>
-          <a class="btn" href="#gallery">See other characters</a>
         </div>
       </div>
 
-      <div id="questionScreen" class="hidden">
-        <p class="question-title">1. What is your favorite number?</p>
-        <p class="sub-explain">Choose number between 0 to 9.</p>
-        <p id="result"></p>
+      <!-- 4개의 막대만 보여주는 화면 -->
+      <section id="barsScreen" class="hidden" aria-live="polite">
+        <div class="bar" id="bar-num"></div>
+        <div class="bar" id="bar-col"></div>
+        <div class="bar" id="bar-act"></div>
+        <div class="bar" id="bar-per"></div>
+      </section>
 
-        <p class="question-title hidden" id="question2">2. What is your favorite color?</p>
-        <p class="sub-explain hidden" id="colorList">
-          (Red - Q, Orange - W, Yellow - E, Green - R, Aqua - T, Blue - Y, Pink - U, Brown - I, Black - O, White - P)
-        </p>
-        <p id="colorResult"></p>
-
-        <p class="question-title hidden" id="question3">3. What do you want to do right now?</p>
-        <p class="sub-explain hidden" id="actList">
-          (Drink 🍺 - A, Sleep 🛌 - S, Drive 🏎️ - D, Sing 🎤 - F, Game 🎮 - G, Sports ⚽️ - H, YouTube ▶️ - J, Netflix 🍿 - K, Reels 📱 - L)
-        </p>
-        <p id="actResult"></p>
-
-        <p class="question-title hidden" id="question4">4. Which personality fits you the most?</p>
-        <p class="sub-explain hidden" id="personalityList">
-          (Calm 🌊 - Z, Curious 🔍 - X, Bold 🔥 - C, Playful 🎈 - V, Logical 🧠 - B, Dreamy ☁️ - N, Mysterious 🦋 - M)
-        </p>
-        <p id="personalityResult"></p>
-      </div>
-
+      <!-- 캐릭터 출력 화면 -->
       <section id="buildPage" class="hidden" aria-live="polite">
         <h2>Your Character Build</h2>
         <div class="stage" id="stage">
-          <!-- Center GIF overlay -->
           <div id="gifContainer"></div>
         </div>
         <div class="nameRow">
-          <input id="charName" type="text" placeholder="Name your character" aria-label="Character name" />
-          <button id="uploadBtn" type="button">Upload</button>
+          <input id="charName" type="text" placeholder="Name your character (optional)" aria-label="Character name" />
+          <button id="downloadBtn" class="btn" type="button">Download PNG</button>
         </div>
       </section>
     </main>
 
     <script>
       let ansNumber = null, ansColor = null, ansAction = null, ansPersonality = null;
+      let gotNum = false, gotCol = false, gotAct = false, gotPer = false;
 
       const goBtn = document.getElementById('goBtn');
       const landing = document.getElementById('landing');
-      const questionScreen = document.getElementById('questionScreen');
-      const result = document.getElementById('result');
-      const question2 = document.getElementById('question2');
-      const colorList = document.getElementById('colorList');
-      const colorResult = document.getElementById('colorResult');
-      const question3 = document.getElementById('question3');
-      const actList = document.getElementById('actList');
-      const actResult = document.getElementById('actResult');
-      const question4 = document.getElementById('question4');
-      const personalityList = document.getElementById('personalityList');
-      const personalityResult = document.getElementById('personalityResult');
+      const barsScreen = document.getElementById('barsScreen');
       const buildPage = document.getElementById('buildPage');
       const stage = document.getElementById('stage');
       const gifContainer = document.getElementById('gifContainer');
 
-      // ✅ Direct GIF URL (i.imgur.com)
+      const barNum = document.getElementById('bar-num');
+      const barCol = document.getElementById('bar-col');
+      const barAct = document.getElementById('bar-act');
+      const barPer = document.getElementById('bar-per');
+
       const GIF_URL = 'https://i.imgur.com/jzampoB.gif';
 
-      const numberMap = { 
-        '1': 'https://i.imgur.com/jNCuoHl.png',
-        '2': 'https://i.imgur.com/8K23oJ2.png'
-      };
-      const colorMap = { 
-        q: 'https://i.imgur.com/32laQFa.png',
-        w: 'https://i.imgur.com/YMQFes4.png'
-      };
-      const actionMap = { 
-        a: 'https://i.imgur.com/sQwSsz1.png',
-        s: 'https://i.imgur.com/7Kthzct.png'
-      };
-      const personalityMap = { 
-        z: 'https://i.imgur.com/QcmfTXU.jpeg',
-        x: 'https://i.imgur.com/I2e5l79.jpeg'
-      };
+      const numberMap = {
+  '1': 'https://i.imgur.com/t6wmmXS.png',
+  '2': 'https://i.imgur.com/aYcxOFK.png',
+  '3': 'https://i.imgur.com/MQVkf5h.png',
+  '4': 'https://i.imgur.com/HNluGp9.png',
+  '5': 'https://i.imgur.com/OQuNvZ1.png',
+  '6': 'https://i.imgur.com/aIrevEj.png',
+  '7': 'https://i.imgur.com/AmigoXX.png',
+  '8': 'https://i.imgur.com/E9ey86q.png',
+  '9': 'https://i.imgur.com/KItlOJO.png',
+  '0': 'https://i.imgur.com/4z1Q93I.png'
+};
+
+      const colorMap = {
+  q: 'https://i.imgur.com/32laQFa.png',
+  w: 'https://i.imgur.com/YMQFes4.png',
+  e: 'https://i.imgur.com/eDy3iIo.png',
+  r: 'https://i.imgur.com/79xkzmS.png',
+  t: 'https://i.imgur.com/iGrGeM2.png',
+  y: 'https://i.imgur.com/CXN4q9X.png',
+  u: 'https://i.imgur.com/70lkf6h.png',
+  i: 'https://i.imgur.com/c9k726C.png',
+  o: 'https://i.imgur.com/FOiiOyA.png',
+  p: 'https://i.imgur.com/Qm63jNB.png'
+};
+
+      const actionMap = {
+  a: 'https://i.imgur.com/sQwSsz1.png',
+  s: 'https://i.imgur.com/7Kthzct.png',
+  d: 'https://i.imgur.com/mo5HsmK.png',
+  f: 'https://i.imgur.com/vYfhbOC.png',
+  g: 'https://i.imgur.com/0lNZPxh.png',
+  h: 'https://i.imgur.com/Dyf6maI.png',
+  j: 'https://i.imgur.com/x81iFE3.png',
+  k: 'https://i.imgur.com/eE8rSyY.png',
+  l: 'https://i.imgur.com/CX1i3Lm.png'
+};
+
+      const personalityMap = {
+  z: 'https://i.imgur.com/QcmfTXU.jpeg',
+  x: 'https://i.imgur.com/I2e5l79.jpeg',
+  c: 'https://i.imgur.com/83HH7Ye.jpeg',
+  v: 'https://i.imgur.com/obKd47E.jpeg',
+  b: 'https://i.imgur.com/rP1ljxf.jpeg',
+  n: 'https://i.imgur.com/MRUlYA8.png',
+  m: 'https://i.imgur.com/bGeuYVl.jpeg'
+};
+
 
       goBtn.addEventListener('click', () => {
         landing.classList.add('hidden');
-        questionScreen.classList.remove('hidden');
-        document.addEventListener('keydown', handleNumber);
+        barsScreen.classList.remove('hidden');
+        document.addEventListener('keydown', handleAnyKey);
       });
 
-      function handleNumber(e) {
-        if (e.key >= '0' && e.key <= '9') {
-          ansNumber = e.key;
-          result.textContent = `You chose number ${e.key}.`;
-          document.removeEventListener('keydown', handleNumber);
-          question2.classList.remove('hidden');
-          colorList.classList.remove('hidden');
-          document.addEventListener('keydown', handleColor);
+      function fillBar(barEl) {
+        barEl.classList.add('filled');
+      }
+
+      function handleAnyKey(e) {
+        const lower = e.key.toLowerCase();
+        if (!lower) return;
+
+        if (!gotNum && lower >= '0' && lower <= '9') {
+          ansNumber = lower; gotNum = true; fillBar(barNum); maybeBuild(); return;
+        }
+        if (!gotCol && 'qwertyuiop'.includes(lower)) {
+          ansColor = lower; gotCol = true; fillBar(barCol); maybeBuild(); return;
+        }
+        if (!gotAct && 'asdfghjkl'.includes(lower)) {
+          ansAction = lower; gotAct = true; fillBar(barAct); maybeBuild(); return;
+        }
+        if (!gotPer && 'zxcvbnm'.includes(lower)) {
+          ansPersonality = lower; gotPer = true; fillBar(barPer); maybeBuild(); return;
         }
       }
 
-      function handleColor(e) {
-        const key = e.key.toLowerCase();
-        if ('qwertyuiop'.includes(key)) {
-          ansColor = key;
-          colorResult.textContent = `You chose body: ${key.toUpperCase()}`;
-          document.removeEventListener('keydown', handleColor);
-          question3.classList.remove('hidden');
-          actList.classList.remove('hidden');
-          document.addEventListener('keydown', handleAction);
-        }
-      }
+      function allFilled() { return gotNum && gotCol && gotAct && gotPer; }
 
-      function handleAction(e) {
-        const key = e.key.toLowerCase();
-        if ('asdfghjkl'.includes(key)) {
-          ansAction = key;
-          actResult.textContent = `You chose accessory: ${key.toUpperCase()}`;
-          document.removeEventListener('keydown', handleAction);
-          question4.classList.remove('hidden');
-          personalityList.classList.remove('hidden');
-          document.addEventListener('keydown', handlePersonality);
-        }
-      }
-
-      function handlePersonality(e) {
-        const key = e.key.toLowerCase();
-        if ('zxcvbnm'.includes(key)) {
-          ansPersonality = key;
-          personalityResult.textContent = `You chose background: ${key.toUpperCase()}`;
-          document.removeEventListener('keydown', handlePersonality);
-          goToBuild();
-        }
-      }
-
-      function goToBuild() {
-        questionScreen.classList.add('hidden');
+      function maybeBuild() {
+        if (!allFilled()) return;
+        document.removeEventListener('keydown', handleAnyKey);
+        barsScreen.classList.add('hidden');
         buildPage.classList.remove('hidden');
-        stage.innerHTML = '';
+
+        stage.innerHTML = '<div id=\"gifContainer\"></div>';
+        const gif = document.getElementById('gifContainer');
 
         const headUrl = numberMap[ansNumber] || null;
         const bodyUrl = colorMap[ansColor] || null;
@@ -283,59 +256,58 @@
         if (accUrl) stage.appendChild(makeImg(accUrl, 'accImg'));
         if (headUrl) stage.appendChild(makeImg(headUrl, 'headImg'));
 
-        // Re-append the GIF container on top and show the GIF
-        stage.appendChild(gifContainer);
-        showCenterGif(GIF_URL);
+        if (GIF_URL) showCenterGif(GIF_URL, gif);
       }
 
       function makeImg(src, cls) {
         const img = document.createElement('img');
-        img.src = src;
-        img.alt = '';
-        img.className = cls;
-        img.loading = 'eager';
+        img.src = src; img.alt = ''; img.className = cls; img.loading = 'eager';
         return img;
       }
 
-      function showCenterGif(url) {
-        gifContainer.classList.remove('hide');
-        gifContainer.innerHTML = '';
-        if (!url) { gifContainer.style.display = 'none'; return; }
-        gifContainer.style.display = 'block';
-
-        if (url.endsWith('.gif')) {
-          const img = document.createElement('img');
-          img.src = url; img.alt = 'Final GIF'; img.className = 'center-gif';
-          gifContainer.appendChild(img);
-        } else if (url.endsWith('.gifv') || url.endsWith('.mp4') || url.endsWith('.webm')) {
-          const video = document.createElement('video');
-          video.autoplay = true; video.loop = true; video.muted = true; video.playsInline = true;
-          video.className = 'center-gif';
-          const mp4 = url.endsWith('.gifv') ? url.replace('.gifv', '.mp4') : url;
-          const source = document.createElement('source');
-          source.src = mp4; source.type = 'video/mp4';
-          video.appendChild(source);
-          gifContainer.appendChild(video);
-        } else {
-          const note = document.createElement('div');
-          note.className = 'gif-note';
-          note.textContent = 'Please set GIF_URL to a direct i.imgur GIF/MP4 URL (not an album).';
-          gifContainer.appendChild(note);
-        }
-
-        // 3초 뒤 서서히 사라짐 → display:none 처리
+      function showCenterGif(url, container) {
+        container.style.display = 'block';
+        container.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = url; img.alt = 'Intro GIF'; img.className = 'center-gif';
+        container.appendChild(img);
         setTimeout(() => {
-          gifContainer.classList.add('hide');
-          setTimeout(() => {
-            gifContainer.style.display = 'none';
-            gifContainer.innerHTML = '';
-          }, 50); // CSS transition(400ms) 종료 후 정리
+          container.classList.add('hide');
+          setTimeout(() => { container.style.display = 'none'; container.innerHTML = ''; }, 420);
         }, 3000);
       }
 
-      document.getElementById('uploadBtn').addEventListener('click', () => {
-        const name = (document.getElementById('charName').value || 'Unnamed').trim();
-        alert(`Uploading character: ${name}\n(이 버튼은 나중에 실제 업로드 로직에 연결할 수 있어요.)`);
+      document.getElementById('downloadBtn').addEventListener('click', async () => {
+        const W = stage.clientWidth || 720, H = stage.clientHeight || 540;
+        const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        const load = (url) => new Promise((res, rej) => {
+          if (!url) return res(null);
+          const img = new Image(); img.crossOrigin = 'anonymous';
+          img.onload = () => res(img); img.onerror = rej; img.src = url;
+        });
+
+        const headUrl = numberMap[ansNumber] || null;
+        const bodyUrl = colorMap[ansColor] || null;
+        const accUrl  = actionMap[ansAction] || null;
+        const bgUrl   = personalityMap[ansPersonality] || null;
+        try {
+          const [bg, body, acc, head] = await Promise.all([load(bgUrl), load(bodyUrl), load(accUrl), load(head)]);
+          if (bg) {
+            const rStage = W/H, rImg = bg.width/bg.height;
+            let dw, dh, dx, dy;
+            if (rImg>rStage){dh=H;dw=dh*rImg;dx=(W-dw)/2;dy=0;} else {dw=W;dh=dw/rImg;dx=0;dy=(H-dh)/2;}
+            ctx.drawImage(bg,dx,dy,dw,dh);
+          } else { ctx.fillStyle='#e9eef7';ctx.fillRect(0,0,W,H); }
+          if (body){const bodyW=W*0.6,bodyH=bodyW*(body.height/body.width),bodyX=(W-bodyW)/2,bodyY=(H-bodyH)/2;ctx.drawImage(body,bodyX,bodyY,bodyW,bodyH);}
+          if (acc){const accW=W*0.28,accH=accW*(acc.height/acc.width),accX=W*0.04,accY=H-(H*0.06)-accH;ctx.drawImage(acc,accX,accY,accW,accH);}
+          if (head){const headW=W*0.25,headH=headW*(head.height/head.width),headX=W*0.20,headY=H*0.08;ctx.drawImage(head,headX,headY,headW,headH);}
+          const name=(document.getElementById('charName').value||'character').trim();
+          const link=document.createElement('a');
+          link.download=`${name||'character'}.png`;
+          link.href=canvas.toDataURL('image/png');
+          link.click();
+        } catch(err){alert('Download failed'); console.error(err);}
       });
     </script>
   </body>

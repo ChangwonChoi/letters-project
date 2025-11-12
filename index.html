@@ -1,314 +1,345 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Make your imaginary character</title>
-    <style>
-      :root {
-        --bg: #87ceeb;
-        --text: #0b1220;
-        --btn-bg: white;
-        --btn-text: #0b1220;
-        --btn-border: rgba(0,0,0,.1);
-        --btn-shadow: 0 8px 24px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
-        --radius: 14px;
-        --ok: #22c55e;
-        --bar-bg: rgba(255,255,255,.6);
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Make your imaginary character</title>
+  <style>
+    :root{
+      --bg:#87ceeb;--text:#0b1220;--btn-bg:#fff;--btn-text:#0b1220;
+      --btn-border:rgba(0,0,0,.1);--btn-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.06);
+      --radius:14px;--ok:#22c55e;
+    }
+    *{box-sizing:border-box}html,body{height:100%;margin:0}
+    body{
+      font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);background:var(--bg);display:grid;place-items:center;min-height:100vh;
+    }
+    main{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;width:100%;max-width:1100px;padding:20px}
+    h1{margin:0;font-size:clamp(26px,5vw,44px);line-height:1.15}
+    p.subtitle{margin:0;font-size:14px;color:rgba(11,18,32,.7)}
+    .actions{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:8px}
+    .btn{
+      appearance:none;border:1px solid var(--btn-border);background:var(--btn-bg);color:var(--btn-text);
+      font-weight:600;font-size:16px;padding:14px 0;border-radius:var(--radius);box-shadow:var(--btn-shadow);
+      cursor:pointer;text-decoration:none;width:200px;text-align:center;transition:transform .08s ease, box-shadow .2s ease
+    }
+    .btn:hover{transform:translateY(-1px)}.btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+    .hidden{display:none !important}
 
-      * { box-sizing: border-box; }
-      html, body { height: 100%; margin: 0; }
-      body {
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-        color: var(--text);
-        background: var(--bg);
-        display: grid;
-        place-items: center;
-        min-height: 100vh;
-      }
+    /* Keyboard layout screen with row labels */
+    #keysScreen{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;width:100%;max-width:960px}
+    .keyboard-row{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+    .row-label{
+      flex:0 0 160px;text-align:right;text-transform:uppercase;
+      font-weight:800;letter-spacing:.04em;color:rgba(0,0,0,.55);opacity:.9;padding-right:6px
+    }
+    .keys{display:flex;justify-content:center;gap:6px;flex:1}
+    .key{
+      width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,.7);
+      box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .25s ease;user-select:none;
+      font-size:0;line-height:0;color:transparent; /* 글자 숨김 */
+    }
+    .key.filled{background:var(--ok);box-shadow:0 0 10px rgba(34,197,94,.5);transform:translateY(-3px)}
 
-      main { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; width: 100%; max-width: 960px; padding: 20px; }
-      h1 { margin: 0; font-size: clamp(26px, 5vw, 44px); line-height: 1.15; }
-      p.subtitle { margin: 0; font-size: 14px; color: rgba(11, 18, 32, 0.7); }
+    /* Build/composition stage (bigger) */
+    #buildPage h2{margin:6px 0 6px}
+    /* Build/composition stage (bigger, almost full screen) */
+    .stage{
+      position:relative;
+      width:min(1200px, 98vw);        
+      height:min(85vh, 72vw);         
+      margin:0 auto 12px;
+      background:#e9eef7;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:var(--btn-shadow);
+    }
 
-      .actions { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 8px; }
-      .btn {
-        appearance: none; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--btn-text);
-        font-weight: 600; font-size: 16px; padding: 14px 0; border-radius: var(--radius); box-shadow: var(--btn-shadow);
-        cursor: pointer; text-decoration: none; width: 200px; text-align: center; transition: transform .08s ease, box-shadow .2s ease;
-      }
-      .btn:hover { transform: translateY(-1px); }
-      .btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-      .hidden { display: none !important; }
+    .stage img{position:absolute;image-rendering:auto;max-width:none;max-height:none}
+    .bgImg{inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+    .bodyImg{width:60%;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;object-fit:contain}
+    .accImg{width:28%;left:4%;bottom:6%;z-index:2;object-fit:contain}
+    .headImg{
+      width:25%;
+      /* 기존: left: calc(50% - 60% * 0.5);  top: calc(50% - 60% * 0.5 - 12%); */
+      left: calc(50% - 60% * 0.5 - 3%);  
+      top:  calc(50% - 60% * 0.5);   
+      z-index:3;
+      object-fit:contain;
+    }
 
-      /* === Input bars screen === */
-      #barsScreen { width: 100%; max-width: 760px; display: grid; gap: 18px; margin-top: 20px; }
-      .bar {
-        background: var(--bar-bg);
-        border: 1px solid rgba(0,0,0,.08);
-        border-radius: 999px;
-        height: 32px;
-        overflow: hidden;
-        position: relative;
-        box-shadow: var(--btn-shadow);
-      }
-      .bar::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0;
-        width: 0%;
-        height: 100%;
-        background: var(--ok);
-        transition: width 0.4s ease;
-      }
-      .bar.filled::after { width: 100%; }
 
-      /* === Build stage === */
-      #buildPage h2 { margin: 6px 0 16px; }
-      .stage {
-        position: relative;
-        width: min(720px, 92vw);
-        height: min(540px, 69vw);
-        margin: 0 auto 12px;
-        background: #e9eef7;
-        border: 1px solid rgba(0,0,0,.08);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: var(--btn-shadow);
-      }
-      .stage img { position: absolute; image-rendering: auto; max-width: none; max-height: none; }
-      .bgImg { inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-      .bodyImg { width: 60%; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1; object-fit: contain; }
-      .accImg { width: 28%; left: 4%; bottom: 6%; z-index: 2; object-fit: contain; }
-      .headImg {
-        width: 25%;
-        left: calc(50% - 60% * 0.5);
-        top: calc(50% - 60% * 0.5 - 12%);
-        z-index: 3;
-        object-fit: contain;
-      }
+    /* Center GIF overlay (height match + 3s fade out) */
+    #gifContainer{position:absolute;inset:0;display:none;z-index:5;pointer-events:none;opacity:1;transition:opacity 400ms ease}
+    #gifContainer.hide{opacity:0}
+    .center-gif{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);height:100%;width:auto;max-height:none;object-fit:contain}
 
-      #gifContainer {
-        position: absolute; inset: 0; display: none; z-index: 5; pointer-events: none;
-        opacity: 1; transition: opacity 400ms ease;
-      }
-      #gifContainer.hide { opacity: 0; }
-      .center-gif {
-        position: absolute;
-        top: 0; bottom: 0; left: 50%;
-        transform: translateX(-50%);
-        height: 100%; width: auto; max-height: none; object-fit: contain;
-      }
+    .footerRow{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:8px;flex-wrap:wrap}
+    .charName{font-weight:800;font-size:clamp(18px,2.6vw,28px);letter-spacing:.02em}
+  </style>
+</head>
+<body>
+  <main>
+    <!-- Landing -->
+    <div id="landing">
+      <h1>Make your imaginary character</h1>
+      <p class="subtitle">☠️A totally unexpected identity!☠️</p>
+      <div class="actions">
+        <button class="btn" id="goBtn">GO</button>
+      </div>
+    </div>
 
-      .nameRow { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 6px; flex-wrap: wrap; }
-      .nameRow input[type="text"] {
-        width: min(360px, 80vw); padding: 10px 12px; border: 1px solid var(--btn-border);
-        border-radius: 10px; font-size: 16px; box-shadow: var(--btn-shadow);
-      }
-      .nameRow .btn { width: auto; padding: 12px 16px; }
-    </style>
-  </head>
-  <body>
-    <main id="main">
-      <div id="landing">
-        <h1>Make your imaginary character</h1>
-        <p class="subtitle">☠️A totally unexpected identity!☠️</p>
-        <div class="actions">
-          <button class="btn" id="goBtn">GO</button>
+    <!-- Keyboard-shaped input screen -->
+    <section id="keysScreen" class="hidden" aria-live="polite">
+      <!-- Row 1: head (10 keys) -->
+      <div class="keyboard-row" id="row-num">
+        <span class="row-label">head</span>
+        <div class="keys">
+          <div class="key" data-group="num"></div><div class="key" data-group="num"></div><div class="key" data-group="num"></div>
+          <div class="key" data-group="num"></div><div class="key" data-group="num"></div><div class="key" data-group="num"></div>
+          <div class="key" data-group="num"></div><div class="key" data-group="num"></div><div class="key" data-group="num"></div>
+          <div class="key" data-group="num"></div>
         </div>
       </div>
-
-      <!-- 4개의 막대만 보여주는 화면 -->
-      <section id="barsScreen" class="hidden" aria-live="polite">
-        <div class="bar" id="bar-num"></div>
-        <div class="bar" id="bar-col"></div>
-        <div class="bar" id="bar-act"></div>
-        <div class="bar" id="bar-per"></div>
-      </section>
-
-      <!-- 캐릭터 출력 화면 -->
-      <section id="buildPage" class="hidden" aria-live="polite">
-        <h2>Your Character Build</h2>
-        <div class="stage" id="stage">
-          <div id="gifContainer"></div>
+      <!-- Row 2: body (10 keys) -->
+      <div class="keyboard-row" id="row-col">
+        <span class="row-label">body</span>
+        <div class="keys">
+          <div class="key" data-group="col"></div><div class="key" data-group="col"></div><div class="key" data-group="col"></div>
+          <div class="key" data-group="col"></div><div class="key" data-group="col"></div><div class="key" data-group="col"></div>
+          <div class="key" data-group="col"></div><div class="key" data-group="col"></div><div class="key" data-group="col"></div>
+          <div class="key" data-group="col"></div>
         </div>
-        <div class="nameRow">
-          <input id="charName" type="text" placeholder="Name your character (optional)" aria-label="Character name" />
-          <button id="downloadBtn" class="btn" type="button">Download PNG</button>
+      </div>
+      <!-- Row 3: pet (9 keys) -->
+      <div class="keyboard-row" id="row-act">
+        <span class="row-label">pet</span>
+        <div class="keys">
+          <div class="key" data-group="act"></div><div class="key" data-group="act"></div><div class="key" data-group="act"></div>
+          <div class="key" data-group="act"></div><div class="key" data-group="act"></div><div class="key" data-group="act"></div>
+          <div class="key" data-group="act"></div><div class="key" data-group="act"></div><div class="key" data-group="act"></div>
         </div>
-      </section>
-    </main>
+      </div>
+      <!-- Row 4: background (7 keys) -->
+      <div class="keyboard-row" id="row-per">
+        <span class="row-label">background</span>
+        <div class="keys">
+          <div class="key" data-group="per"></div><div class="key" data-group="per"></div><div class="key" data-group="per"></div>
+          <div class="key" data-group="per"></div><div class="key" data-group="per"></div><div class="key" data-group="per"></div>
+          <div class="key" data-group="per"></div>
+        </div>
+      </div>
+    </section>
 
-    <script>
-      let ansNumber = null, ansColor = null, ansAction = null, ansPersonality = null;
-      let gotNum = false, gotCol = false, gotAct = false, gotPer = false;
+    <!-- Build page -->
+    <section id="buildPage" class="hidden" aria-live="polite">
+      <h2>Your Character Build</h2>
+      <div class="stage" id="stage">
+        <div id="gifContainer"></div>
+      </div>
+      <div id="generatedName" class="charName"></div>
+      <div class="footerRow">
+        <button id="restartBtn" class="btn" type="button">다시하기</button>
+      </div>
+    </section>
+  </main>
 
-      const goBtn = document.getElementById('goBtn');
-      const landing = document.getElementById('landing');
-      const barsScreen = document.getElementById('barsScreen');
-      const buildPage = document.getElementById('buildPage');
-      const stage = document.getElementById('stage');
-      const gifContainer = document.getElementById('gifContainer');
+  <script>
+    // ===== State =====
+    let ansNumber=null, ansColor=null, ansAction=null, ansPersonality=null;
+    let gotNum=false, gotCol=false, gotAct=false, gotPer=false;
 
-      const barNum = document.getElementById('bar-num');
-      const barCol = document.getElementById('bar-col');
-      const barAct = document.getElementById('bar-act');
-      const barPer = document.getElementById('bar-per');
+    const goBtn=document.getElementById('goBtn');
+    const landing=document.getElementById('landing');
+    const keysScreen=document.getElementById('keysScreen');
+    const buildPage=document.getElementById('buildPage');
+    const stage=document.getElementById('stage');
+    const gifContainer=document.getElementById('gifContainer');
+    const restartBtn=document.getElementById('restartBtn');
+    const generatedName=document.getElementById('generatedName');
 
-      const GIF_URL = 'https://i.imgur.com/jzampoB.gif';
+    const GIF_URL='https://i.imgur.com/jzampoB.gif';
 
-      const numberMap = {
-  '1': 'https://i.imgur.com/t6wmmXS.png',
-  '2': 'https://i.imgur.com/aYcxOFK.png',
-  '3': 'https://i.imgur.com/MQVkf5h.png',
-  '4': 'https://i.imgur.com/HNluGp9.png',
-  '5': 'https://i.imgur.com/OQuNvZ1.png',
-  '6': 'https://i.imgur.com/aIrevEj.png',
-  '7': 'https://i.imgur.com/AmigoXX.png',
-  '8': 'https://i.imgur.com/E9ey86q.png',
-  '9': 'https://i.imgur.com/KItlOJO.png',
-  '0': 'https://i.imgur.com/4z1Q93I.png'
-};
+    // ===== Image maps =====
+    // Numbers: head (0–9). 1 수정 적용.
+    const numberMap={
+      '1':'https://i.imgur.com/jNCuoHl.png',
+      '2':'https://i.imgur.com/aYcxOFK.png',
+      '3':'https://i.imgur.com/MQVkf5h.png',
+      '4':'https://i.imgur.com/HNluGp9.png',
+      '5':'https://i.imgur.com/OQuNvZ1.png',
+      '6':'https://i.imgur.com/aIrevEj.png',
+      '7':'https://i.imgur.com/AmigoXX.png',
+      '8':'https://i.imgur.com/E9ey86q.png',
+      '9':'https://i.imgur.com/KItlOJO.png',
+      '0':'https://i.imgur.com/4z1Q93I.png'
+    };
+    // Q–P: body. W 수정 적용.
+    const colorMap={
+      q:'https://i.imgur.com/32laQFa.png',
+      w:'https://i.imgur.com/clTBk2P.png',
+      e:'https://i.imgur.com/eDy3iIo.png',
+      r:'https://i.imgur.com/79xkzmS.png',
+      t:'https://i.imgur.com/iGrGeM2.png',
+      y:'https://i.imgur.com/CXN4q9X.png',
+      u:'https://i.imgur.com/70lkf6h.png',
+      i:'https://i.imgur.com/c9k726C.png',
+      o:'https://i.imgur.com/FOiiOyA.png',
+      p:'https://i.imgur.com/Qm63jNB.png'
+    };
+    // A–L: pet (acc placement)
+    const actionMap={
+      a:'https://i.imgur.com/sQwSsz1.png',
+      s:'https://i.imgur.com/7Kthzct.png',
+      d:'https://i.imgur.com/mo5HsmK.png',
+      f:'https://i.imgur.com/vYfhbOC.png',
+      g:'https://i.imgur.com/0lNZPxh.png',
+      h:'https://i.imgur.com/Dyf6maI.png',
+      j:'https://i.imgur.com/x81iFE3.png',
+      k:'https://i.imgur.com/eE8rSyY.png',
+      l:'https://i.imgur.com/CX1i3Lm.png'
+    };
+    // Z–M: background
+    const personalityMap={
+      z:'https://i.imgur.com/QcmfTXU.jpeg',
+      x:'https://i.imgur.com/I2e5l79.jpeg',
+      c:'https://i.imgur.com/83HH7Ye.jpeg',
+      v:'https://i.imgur.com/obKd47E.jpeg',
+      b:'https://i.imgur.com/rP1ljxf.jpeg',
+      n:'https://i.imgur.com/MRUlYA8.png',
+      m:'https://i.imgur.com/bGeuYVl.jpeg'
+    };
 
-      const colorMap = {
-  q: 'https://i.imgur.com/32laQFa.png',
-  w: 'https://i.imgur.com/YMQFes4.png',
-  e: 'https://i.imgur.com/eDy3iIo.png',
-  r: 'https://i.imgur.com/79xkzmS.png',
-  t: 'https://i.imgur.com/iGrGeM2.png',
-  y: 'https://i.imgur.com/CXN4q9X.png',
-  u: 'https://i.imgur.com/70lkf6h.png',
-  i: 'https://i.imgur.com/c9k726C.png',
-  o: 'https://i.imgur.com/FOiiOyA.png',
-  p: 'https://i.imgur.com/Qm63jNB.png'
-};
+    // ===== Name maps (auto title) =====
+    // 숫자 1~9, 0(=10) 매핑
+    const nameNumberMap={
+      '1':'Cerbero',
+      '2':'Tirano',
+      '3':'Hoallo',
+      '4':'Peokumpeokum',
+      '5':'Eheradia',
+      '6':'Taekwonattacka',
+      '7':'Bloloblob',
+      '8':'GOAT',
+      '9':'Peperepepe',
+      '0':'Petergriffino' // 10에 해당하는 키보드 '0'
+    };
+    // Q~O 매핑 (요청 목록 기준)
+    const nameColorMap={
+      q:'Roboro',
+      w:'Superro',
+      e:'Vacca',
+      r:'Roboclino',
+      t:'Halfandhalf',
+      y:'S-klasse',
+      u:'Humbahumba',
+      i:'Carpetbombo',
+      o:'Waftywafty'
+      // p: (이름 미정 시 공백 처리)
+    };
 
-      const actionMap = {
-  a: 'https://i.imgur.com/sQwSsz1.png',
-  s: 'https://i.imgur.com/7Kthzct.png',
-  d: 'https://i.imgur.com/mo5HsmK.png',
-  f: 'https://i.imgur.com/vYfhbOC.png',
-  g: 'https://i.imgur.com/0lNZPxh.png',
-  h: 'https://i.imgur.com/Dyf6maI.png',
-  j: 'https://i.imgur.com/x81iFE3.png',
-  k: 'https://i.imgur.com/eE8rSyY.png',
-  l: 'https://i.imgur.com/CX1i3Lm.png'
-};
+    // ===== Flow =====
+    goBtn.addEventListener('click',()=>{
+      landing.classList.add('hidden');
+      keysScreen.classList.remove('hidden');
+      document.addEventListener('keydown',handleKey);
+    });
 
-      const personalityMap = {
-  z: 'https://i.imgur.com/QcmfTXU.jpeg',
-  x: 'https://i.imgur.com/I2e5l79.jpeg',
-  c: 'https://i.imgur.com/83HH7Ye.jpeg',
-  v: 'https://i.imgur.com/obKd47E.jpeg',
-  b: 'https://i.imgur.com/rP1ljxf.jpeg',
-  n: 'https://i.imgur.com/MRUlYA8.png',
-  m: 'https://i.imgur.com/bGeuYVl.jpeg'
-};
+    function markRowFilled(selector){
+      document.querySelectorAll(selector).forEach(k=>k.classList.add('filled'));
+    }
 
+    function handleKey(e){
+      const lower=(e.key||'').toLowerCase();
+      if(!lower) return;
 
-      goBtn.addEventListener('click', () => {
-        landing.classList.add('hidden');
-        barsScreen.classList.remove('hidden');
-        document.addEventListener('keydown', handleAnyKey);
-      });
-
-      function fillBar(barEl) {
-        barEl.classList.add('filled');
+      if(!gotNum && lower>='0' && lower<='9'){
+        ansNumber=lower; gotNum=true; markRowFilled('#row-num .key'); maybeBuild(); return;
       }
-
-      function handleAnyKey(e) {
-        const lower = e.key.toLowerCase();
-        if (!lower) return;
-
-        if (!gotNum && lower >= '0' && lower <= '9') {
-          ansNumber = lower; gotNum = true; fillBar(barNum); maybeBuild(); return;
-        }
-        if (!gotCol && 'qwertyuiop'.includes(lower)) {
-          ansColor = lower; gotCol = true; fillBar(barCol); maybeBuild(); return;
-        }
-        if (!gotAct && 'asdfghjkl'.includes(lower)) {
-          ansAction = lower; gotAct = true; fillBar(barAct); maybeBuild(); return;
-        }
-        if (!gotPer && 'zxcvbnm'.includes(lower)) {
-          ansPersonality = lower; gotPer = true; fillBar(barPer); maybeBuild(); return;
-        }
+      if(!gotCol && 'qwertyuiop'.includes(lower)){
+        ansColor=lower; gotCol=true; markRowFilled('#row-col .key'); maybeBuild(); return;
       }
-
-      function allFilled() { return gotNum && gotCol && gotAct && gotPer; }
-
-      function maybeBuild() {
-        if (!allFilled()) return;
-        document.removeEventListener('keydown', handleAnyKey);
-        barsScreen.classList.add('hidden');
-        buildPage.classList.remove('hidden');
-
-        stage.innerHTML = '<div id=\"gifContainer\"></div>';
-        const gif = document.getElementById('gifContainer');
-
-        const headUrl = numberMap[ansNumber] || null;
-        const bodyUrl = colorMap[ansColor] || null;
-        const accUrl  = actionMap[ansAction] || null;
-        const bgUrl   = personalityMap[ansPersonality] || null;
-
-        if (bgUrl) stage.appendChild(makeImg(bgUrl, 'bgImg'));
-        if (bodyUrl) stage.appendChild(makeImg(bodyUrl, 'bodyImg'));
-        if (accUrl) stage.appendChild(makeImg(accUrl, 'accImg'));
-        if (headUrl) stage.appendChild(makeImg(headUrl, 'headImg'));
-
-        if (GIF_URL) showCenterGif(GIF_URL, gif);
+      if(!gotAct && 'asdfghjkl'.includes(lower)){
+        ansAction=lower; gotAct=true; markRowFilled('#row-act .key'); maybeBuild(); return;
       }
-
-      function makeImg(src, cls) {
-        const img = document.createElement('img');
-        img.src = src; img.alt = ''; img.className = cls; img.loading = 'eager';
-        return img;
+      if(!gotPer && 'zxcvbnm'.includes(lower)){
+        ansPersonality=lower; gotPer=true; markRowFilled('#row-per .key'); maybeBuild(); return;
       }
+    }
 
-      function showCenterGif(url, container) {
-        container.style.display = 'block';
-        container.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = url; img.alt = 'Intro GIF'; img.className = 'center-gif';
-        container.appendChild(img);
-        setTimeout(() => {
-          container.classList.add('hide');
-          setTimeout(() => { container.style.display = 'none'; container.innerHTML = ''; }, 420);
-        }, 3000);
-      }
+    function allFilled(){return gotNum && gotCol && gotAct && gotPer;}
 
-      document.getElementById('downloadBtn').addEventListener('click', async () => {
-        const W = stage.clientWidth || 720, H = stage.clientHeight || 540;
-        const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
-        const ctx = canvas.getContext('2d');
-        const load = (url) => new Promise((res, rej) => {
-          if (!url) return res(null);
-          const img = new Image(); img.crossOrigin = 'anonymous';
-          img.onload = () => res(img); img.onerror = rej; img.src = url;
-        });
+    function maybeBuild(){
+      if(!allFilled()) return;
+      document.removeEventListener('keydown',handleKey);
+      keysScreen.classList.add('hidden');
+      buildPage.classList.remove('hidden');
 
-        const headUrl = numberMap[ansNumber] || null;
-        const bodyUrl = colorMap[ansColor] || null;
-        const accUrl  = actionMap[ansAction] || null;
-        const bgUrl   = personalityMap[ansPersonality] || null;
-        try {
-          const [bg, body, acc, head] = await Promise.all([load(bgUrl), load(bodyUrl), load(accUrl), load(head)]);
-          if (bg) {
-            const rStage = W/H, rImg = bg.width/bg.height;
-            let dw, dh, dx, dy;
-            if (rImg>rStage){dh=H;dw=dh*rImg;dx=(W-dw)/2;dy=0;} else {dw=W;dh=dw/rImg;dx=0;dy=(H-dh)/2;}
-            ctx.drawImage(bg,dx,dy,dw,dh);
-          } else { ctx.fillStyle='#e9eef7';ctx.fillRect(0,0,W,H); }
-          if (body){const bodyW=W*0.6,bodyH=bodyW*(body.height/body.width),bodyX=(W-bodyW)/2,bodyY=(H-bodyH)/2;ctx.drawImage(body,bodyX,bodyY,bodyW,bodyH);}
-          if (acc){const accW=W*0.28,accH=accW*(acc.height/acc.width),accX=W*0.04,accY=H-(H*0.06)-accH;ctx.drawImage(acc,accX,accY,accW,accH);}
-          if (head){const headW=W*0.25,headH=headW*(head.height/head.width),headX=W*0.20,headY=H*0.08;ctx.drawImage(head,headX,headY,headW,headH);}
-          const name=(document.getElementById('charName').value||'character').trim();
-          const link=document.createElement('a');
-          link.download=`${name||'character'}.png`;
-          link.href=canvas.toDataURL('image/png');
-          link.click();
-        } catch(err){alert('Download failed'); console.error(err);}
-      });
-    </script>
-  </body>
+      // Build composition
+      stage.innerHTML='<div id="gifContainer"></div>';
+      const gif=document.getElementById('gifContainer');
+
+      const headUrl=numberMap[ansNumber]||null;
+      const bodyUrl=colorMap[ansColor]||null;
+      const petUrl =actionMap[ansAction]||null;
+      const bgUrl  =personalityMap[ansPersonality]||null;
+
+      if(bgUrl)  stage.appendChild(makeImg(bgUrl,'bgImg'));
+      if(bodyUrl)stage.appendChild(makeImg(bodyUrl,'bodyImg'));
+      if(petUrl) stage.appendChild(makeImg(petUrl,'accImg'));
+      if(headUrl)stage.appendChild(makeImg(headUrl,'headImg'));
+
+      // -------- Auto name --------
+      const n1 = nameNumberMap[ansNumber] || '';
+      const n2 = nameColorMap[ansColor] || '';
+      const displayName = [n1, n2].filter(Boolean).join(' ');
+      generatedName.textContent = displayName || 'Unnamed';
+
+      // Optional GIF overlay
+      if(GIF_URL) showCenterGif(GIF_URL,gif);
+    }
+
+    function makeImg(src,cls){
+      const img=document.createElement('img');
+      img.src=src; img.alt=''; img.className=cls; img.loading='eager';
+      return img;
+    }
+
+    // GIF height=stage height, fade out after 3s
+    function showCenterGif(url,container){
+      container.style.display='block';
+      container.innerHTML='';
+      const img=document.createElement('img');
+      img.src=url; img.alt='Intro GIF'; img.className='center-gif';
+      container.appendChild(img);
+      setTimeout(()=>{
+        container.classList.add('hide');
+        setTimeout(()=>{container.style.display='none'; container.innerHTML='';}, 420);
+      },3000);
+    }
+
+    // ===== Restart (다시하기) =====
+    restartBtn.addEventListener('click', resetAll);
+
+    function resetAll(){
+      // clear state
+      ansNumber=ansColor=ansAction=ansPersonality=null;
+      gotNum=gotCol=gotAct=gotPer=false;
+
+      // clear visuals
+      generatedName.textContent='';
+      stage.innerHTML='<div id="gifContainer"></div>';
+
+      // unfill keyboard rows
+      document.querySelectorAll('#keysScreen .key').forEach(k=>k.classList.remove('filled'));
+
+      // show keyboard screen
+      buildPage.classList.add('hidden');
+      keysScreen.classList.remove('hidden');
+      document.addEventListener('keydown',handleKey);
+    }
+  </script>
+</body>
 </html>
